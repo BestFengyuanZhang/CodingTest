@@ -29,46 +29,50 @@ public class RedBookSolution2 {
         int m = in.nextInt();
 
         // 统计每个值出现的次数
-        Map<Long, Integer> cnt = new HashMap<>();
+        Map<Long, Long> cnt = new HashMap<>();
         long mx = 0;
         for (int i = 0; i < n; i++) {
             long a = in.nextLong();
-            cnt.put(a, cnt.getOrDefault(a, 0) + 1);
+            cnt.put(a, cnt.getOrDefault(a, 0L) + 1);
             mx = Math.max(mx, a);
         }
 
         // 处理m个查询
         for (int q = 0; q < m; q++) {
             long x = in.nextLong();
+            long res = 0;
             Set<Long> visited = new HashSet<>();
-            int res = 0;
 
-            // 找x的所有因子（包括1和x本身）
+            // 找x的所有因子（x能被这些数整除）
             for (long i = 1; i * i <= x; i++) {
                 if (x % i == 0) {
-                    if (!visited.contains(i)) {
+                    if (cnt.containsKey(i) && !visited.contains(i)) {
+                        res += cnt.get(i);
                         visited.add(i);
-                        res += cnt.getOrDefault(i, 0);
                     }
                     long other = x / i;
-                    if (i != other && !visited.contains(other)) {
+                    if (i != other && cnt.containsKey(other) && !visited.contains(other)) {
+                        res += cnt.get(other);
                         visited.add(other);
-                        res += cnt.getOrDefault(other, 0);
                     }
                 }
             }
 
-            // 找x的倍数（不包括x本身，因为已经在因子中处理过了）
-            for (long mul = 2 * x; mul <= mx; mul += x) {
-                if (!visited.contains(mul)) {
-                    visited.add(mul);
-                    res += cnt.getOrDefault(mul, 0);
+            // 找x的倍数（这些数能被x整除）
+            if (x <= mx) {
+                for (long mul = x; mul <= mx; mul += x) {
+                    if (cnt.containsKey(mul) && !visited.contains(mul)) {
+                        res += cnt.get(mul);
+                        visited.add(mul);
+                    }
                 }
             }
 
             out.append(res).append('\n');
         }
 
-        System.out.print(out);
+        PrintWriter  pw = new PrintWriter(System.out);
+        pw.print(out);
+        pw.flush();
     }
 }
